@@ -13,8 +13,11 @@ namespace SentientStatus
     {
         public List<StatusData> data;
         public RandomMessageData randomData;
+        public List<DayStatusData> setDayData;
         public Timer worker;
         public StatusData current;
+
+        private Random random = new Random();
 
         private string authorization;
 
@@ -32,14 +35,26 @@ namespace SentientStatus
 
             ParseSetMessage();
             ParseRandomMessage();
+            ParseSetDayMessage();
             
             var start = TimeSpan.Zero;
             var interval = TimeSpan.FromSeconds(1800); //1800
             Console.WriteLine("Starting worker.");
-            worker = new Timer((e) => {
+            worker = new Timer((e) =>
+            {
 
-                StatusData sd = GetRandom();
-                bool result = Call(sd.message, sd.emoji).Result;
+                StatusData checkDay = CheckDayStatus();
+                bool result;
+                if (checkDay != null)
+                {
+                    result = Call(checkDay.message, checkDay.emoji).Result;
+                }
+                else
+                {
+                    StatusData sd = GetRandom();
+                    //Console.WriteLine($"{sd.message} and {sd.emoji}");
+                    result = Call(sd.message, sd.emoji).Result;   
+                }
 
             }, null, start, interval);
         }
@@ -97,9 +112,32 @@ namespace SentientStatus
             }
         }
 
+        public void ParseSetDayMessage()
+        {
+            using (StreamReader r = new StreamReader("data_setday.json"))
+            {
+                string json = r.ReadToEnd();
+                SetDayMessageData data = JsonConvert.DeserializeObject<SetDayMessageData>(json);
+                setDayData = data.status;
+            }
+        }
+
+        public StatusData CheckDayStatus()
+        {
+            DateTime currentDateTime = DateTime.Now;
+            foreach (DayStatusData d in setDayData)
+            {
+                if (currentDateTime.Day == d.day && currentDateTime.Month == d.month)
+                {
+                    return d.statusData;
+                }
+            }
+
+            return null;
+        }
+
         public StatusData GetRandom()
         {
-            var random = new Random();
             StatusData d = null;
             
             if (false /*random.Next(2) == 0*/) // Random Status!

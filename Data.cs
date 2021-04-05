@@ -21,6 +21,11 @@ namespace SentientStatus
         public List<ConnectorData> connectors { get; set; }
     }
 
+    public class SetDayMessageData
+    {
+        public List<DayStatusData> status { get; set; }
+    }
+
     public class ConnectorData
     {
         public string connector;
@@ -47,7 +52,6 @@ namespace SentientStatus
             OnlyOneTypeEnd
         }
     }
-    
 
     public class StatusData
     {
@@ -55,8 +59,17 @@ namespace SentientStatus
         public string message;
     }
 
+    public class DayStatusData
+    {
+        public int day;
+        public int month;
+        public StatusData statusData;
+    }
+
     public class Helper
     {
+        private static Random random = new Random();
+        
         public static string GetRandomSentence(ConnectorData connector, RandomMessageData randomData)
         {
             string final = null;
@@ -72,6 +85,7 @@ namespace SentientStatus
             {
                 while (secondPart == firstPart)
                 {
+                    Console.WriteLine($"{secondPart} compared to {firstPart}");
                     secondPart = GetRandomDataPart(connector.secondType, randomData);
                 }
             }
@@ -94,22 +108,27 @@ namespace SentientStatus
         public static string GetRandomDataPart(ConnectorData.ConnectorType type, RandomMessageData data)
         {
             string toReturn = "unsupported";
-            var random = new Random();
             switch (type)
             {
                 case ConnectorData.ConnectorType.Objects:
                 {
-                    toReturn = data.objects[random.Next(data.objects.Count)];
+                    var yes = random.Next(data.objects.Count);
+                    Console.WriteLine($"DEBUG OBJECTS:\nrand int {yes}\nobjects size {data.objects.Count}");
+                    toReturn = data.objects[yes];
                     break;
                 }
                 case ConnectorData.ConnectorType.People:
                 {
-                    toReturn = data.people[random.Next(data.people.Count)];
+                    var yes = random.Next(data.people.Count);
+                    Console.WriteLine($"DEBUG PEOPLE:\nrand int {yes}\npeople size {data.people.Count}");
+                    toReturn = data.people[yes];
                     break;
                 }
                 case ConnectorData.ConnectorType.Places:
                 {
-                    toReturn = data.places[random.Next(data.places.Count)];
+                    var yes = random.Next(data.places.Count);
+                    Console.WriteLine($"DEBUG PLACES:\nrand int {yes}\nplaces size {data.places.Count}");
+                    toReturn = data.places[yes];
                     break;
                 }
             }
@@ -175,6 +194,10 @@ namespace SentientStatus
                     return "🔥";
                 case "skull":
                     return "💀";
+                case "spinny_light":
+                    return "🚨";
+                case "hatching_chick":
+                    return "🐣";
                 default:
                     return "🍉";
             }
